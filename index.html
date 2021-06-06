@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600&Noto+Sans+TC&display=swap"
+    rel="stylesheet">
+  <title>Document</title>
+  <style>
+    * {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 600;
+    }
+
+    html,
+    body {
+      margin: 0;
+      background: rgb(195, 214, 187);
+    }
+
+    #all {
+      width: 480px;
+      height: 560px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      padding: 25px;
+      transform: translate(-50%, -50%);
+      background: rgb(250, 255, 233);
+    }
+
+    #top {
+      width: 460px;
+      height: 80px;
+      margin: auto;
+      position: relative;
+    }
+
+    .left {
+      display: inline-block;
+      font-size: 48px;
+    }
+
+    .right {
+      display: inline-block;
+      position: absolute;
+      right: 0;
+      top: 10px;
+      border-radius: 50%;
+      line-height: 60px;
+      text-align: center;
+      font-size: 36px;
+      width: 60px;
+      height: 60px;
+      background: rgb(162, 229, 255);
+      color: white;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    #game,
+    #block,
+    #over {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 480px;
+      height: 480px;
+      margin: auto;
+    }
+
+
+    .card {
+      width: 100px;
+      height: 100px;
+      position: relative;
+      /* 設定子元素在 3D 空間內 */
+      transform-style: preserve-3d;
+      transition: transform .5s;
+      float: left;
+      color: #2c6ec4;
+      margin: 10px;
+    }
+
+    .card-back {
+      width: 100%;
+      height: 100%;
+      background-color: #e8ddcb;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      position: absolute;
+      transform: rotateY(0deg);
+      transition: transform .5s;
+      background-image: url(./images/back.png);
+      /* 翻過來後隱藏背面 */
+      backface-visibility: hidden;
+      -web-backface-visibility: hidden;
+    }
+
+    .card-front {
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      position: absolute;
+      transform: rotateY(180deg);
+      transition: transform .5s;
+      background-color: #e8ddcb;
+      /* 翻過來後隱藏背面 */
+      backface-visibility: hidden;
+      -web-backface-visibility: hidden;
+    }
+
+    .card-open,
+    .card-clear {
+      transform: rotateY(180deg);
+    }
+
+    #start,
+    #over-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 60px;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      line-height: 60px;
+    }
+
+
+    #start {
+      background: #FFCE34;
+    }
+
+    #over-text {
+      background: rgb(97, 77, 12);
+      transition: .5s;
+      color: white;
+    }
+
+
+    #start:hover {
+      background: rgb(97, 77, 12);
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <audio id="audio" src="button26.mp3" volume="0.0"></audio>
+  <div id="all">
+    <div id="top">
+      <div class="left">動物連連看</div>
+      <div class="right">45</div>
+    </div>
+    <div>
+      <div id="game">
+      </div>
+      <div id="block">
+        <div id="start">Start</div>
+      </div>
+      <div id="over">
+        <div id="over-text">遊戲結束</div>
+      </div>
+    </div>
+  </div>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script>
+    const audio = document.getElementById('audio')
+    let countdown = 45
+    let remember = 3
+    $('#over').css('display', 'none')
+    $('#start').click(function () {
+      $('#block').css('display', 'none')
+      $('.card-back').css('transform', 'rotateY(180deg)')
+      $('.card-front').css('transform', 'rotateY(0deg)')
+      $('.right').css('background', 'green')
+      $('.right').text(remember)
+      remembertime = setInterval(() => {
+        remember--
+        $('.right').text(remember)
+      }, 1000)
+      setTimeout(() => {
+        clearInterval(remembertime)
+        $('.right').css('background', 'rgb(162, 229, 255)')
+        $('.right').text(countdown)
+        $('.card-back').css('transform', 'rotateY(0deg)')
+        $('.card-front').css('transform', 'rotateY(180deg)')
+        gametime = setInterval(() => {
+          countdown--
+          $('.right').text(countdown)
+          // 時間到結束
+          if (countdown <= 0) {
+            clearInterval(gametime)
+            $('#over').css('display', 'block')
+            $('#over-text').css('background', 'rgb(97, 77, 12)')
+            $('#over-text').text('遊戲結束')
+
+            setTimeout(() => {
+              $('#over-text').mouseout(() => {
+                $('#over-text').css('background', 'rgb(97, 77, 12)')
+                $('#over-text').text('遊戲結束')
+              })
+              $('#over-text').mouseover(() => {
+                $('#over-text').css('background', '#ff3b34')
+                $('#over-text').text('再來一次')
+              })
+            }, 800)
+            $('#over-text').click(() => {
+              $('#over').css('display', 'none')
+              $('#block').css('display', 'block')
+              countdown = 45
+              remember = 3
+              $('.card-clear').find('.card-front').css('backgroundColor', '#e8ddcb')
+              $('.card').attr('class', 'card')
+              gamesetting()
+            })
+          }
+          // 過關結束
+          if ($('.card-clear').length === 16) {
+            clearInterval(gametime)
+            setTimeout(() => {
+              $('#over').css('display', 'block')
+              $('#over-text').css('background', '#ff3b34')
+              $('#over-text').text('恭喜過關')
+
+              setTimeout(() => {
+                $('#over-text').css('background', '#000')
+                $('#over-text').mouseout(() => {
+                  $('#over-text').css('background', '#ff3b34')
+                  $('#over-text').text('恭喜過關')
+                })
+                $('#over-text').mouseover(() => {
+                  $('#over-text').css('background', 'rgb(97, 77, 12)')
+                  $('#over-text').text('再來一次')
+                })
+              }, 800)
+              $('#over-text').click(() => {
+                $('#over').css('display', 'none')
+                $('#block').css('display', 'block')
+                countdown = 45
+                remember = 3
+                $('.card-clear').find('.card-front').css('backgroundColor', '#e8ddcb')
+                $('.card').attr('class', 'card')
+                gamesetting()
+              })
+            }, 500)
+          }
+        }, 1000);
+      }, 3000);
+    })
+
+    // 產生 16 張卡片
+    for (let i = 0; i < 16; i++) {
+      $('#game').append(`
+        <div class="card">
+          <div class="card-back"></div>
+          <div class="card-front"></div>
+        </div>
+      `)
+    }
+
+    const gamesetting = () => {
+      // 決定數字並打散
+      for (let i = 0; i < 16; i++) {
+        // 決定數字
+        let number = i % (16 / 2) + 1
+        $('.card').eq(i).find('.card-front').css('background-image', `url(./images/${number}.png)`)
+        $('.card').eq(i).attr('data-card', number)
+
+        // 隨機打散
+        let target = Math.floor(Math.random() * 16)
+        $('.card').eq(target).insertAfter($('.card').eq(i))
+      }
+    }
+
+    gamesetting()
+
+    $('#game').on('click', '.card', function () {
+      // 最多只能翻兩張牌
+      if ($('.card-open').length < 2 && !$(this).hasClass('card-open')) {
+        $(this).addClass('card-open')
+      }
+      //如果翻開兩張了
+      if ($('.card-open').length === 2) {
+        // 如果兩張的數字依樣
+        if ($('.card-open').eq(0).attr('data-card') === $('.card-open').eq(1).attr('data-card')) {
+          // 淡出，使用card-clear 標記以解決
+          setTimeout(() => {
+            audio.play()
+            $('.card-open').addClass('card-clear')
+            $('.card-open').removeClass('card-open')
+            $('.card-clear').find('.card-front').css('backgroundColor', '#FFCE34')
+          }, 600);
+        } else {
+          setTimeout(() => {
+            $('.card-open').removeClass('card-open')
+          }, 600);
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
